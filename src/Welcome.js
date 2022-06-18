@@ -1,9 +1,21 @@
 import { Button, Card, CardGroup } from "react-bootstrap";
+import {useEffect} from "react";
 import { Col, Row } from "react-bootstrap";
 import {Link} from 'react-router-dom';
 import MyCard from "./MyCard";
+import { routesInfo as _r} from "./routeTools";
 
 export function Welcome(props) {
+
+    const [path, setPath] = props.path;
+
+    useEffect(()=>{
+        setPath([{
+            route: "/",
+            name:"Home",
+            isActive: true
+        }])
+    },[])
 
     const chapters = [
         {
@@ -15,7 +27,13 @@ export function Welcome(props) {
             key: 1,
             title: "Equipment",
         text: "Check, place and modify equipment info",
-        link: "/item/all"}
+        link: "/item/all"},
+        {
+            key: 2,
+            title: _r.users_all.title,
+        text: "Manage users",
+        link: _r.users_all.route
+    }
     ]
     return (
         <>

@@ -89,7 +89,7 @@ export function getAndSetAuditory(id, setData, setError, setPending){
         });
 }
 
-export function updateAuditory(auditory, setPending, setError) {
+export function updateAuditory(auditory, setPending, setError, successCallback=()=>{}) {
     setError(null);
     const runFetch = async ()=>{
         try {
@@ -97,12 +97,14 @@ export function updateAuditory(auditory, setPending, setError) {
                 setPending(true);
                 setTimeout(async () => {
                     try {
-                        const ret = await fetch(apiUrl + "/" + modelName + "/" + auditory.id, {
+                        const id = auditory._id;
+                        delete auditory._id; 
+                        const ret = await fetch(apiUrl + "/" + modelName + "/" + id, {
                             method: "PATCH",
                             headers: { "content-type": "application/json" },
                             body: JSON.stringify(auditory),
                         });
-                        if (ret.status !== 200) throw new Error("Server returned error");
+                        if (ret.status !== 201) throw new Error("Server returned error");
                         setPending(false);
                         resolve();
                     } catch (err) {
@@ -110,6 +112,7 @@ export function updateAuditory(auditory, setPending, setError) {
                     }
                 }, 1000)
             });
+            successCallback();
         } catch (err) {
             setError(err);
             setPending(false);
@@ -118,7 +121,7 @@ export function updateAuditory(auditory, setPending, setError) {
     runFetch();
 }
 
-export function deleteAuditory(id, setPending, setError) {
+export function deleteAuditory(id, setPending=()=>{}, setError=()=>{}) {
     setError(null);
     const runFetch = async () => {
         try {

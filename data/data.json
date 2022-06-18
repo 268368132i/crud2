@@ -2,7 +2,7 @@
   "auditories": [
     {
       "id": 1,
-      "name": "01abbb",
+      "name": "01",
       "building": "1",
       "size": 25
     },
@@ -47,35 +47,60 @@
     {
       "name": "f",
       "model": "f",
-      "id": 1
+      "id": 1,
+      "location": null,
+      "owner": 4
     },
     {
-      "name": "f",
+      "name": "Cub",
       "model": "f",
-      "id": 2
+      "id": 2,
+      "inventoryNum": "545023843892"
     },
     {
       "name": "New item",
       "model": "New model",
-      "id": 3
+      "id": 3,
+      "inUseSince": "2003-09-03",
+      "inventoryNum": "01361234",
+      "location": 7,
+      "owner": 4
     },
     {
       "name": "Another item",
       "model": "New model 2",
       "inUseSince": "1999-05-12",
-      "id": 4
+      "id": 4,
+      "owner": 5,
+      "inventoryNum": "54353656547",
+      "location": 1
     },
     {
-      "name": "Hyunday",
-      "model": "Accent",
+      "name": "Kia",
+      "model": "Rio",
       "inUseSince": "2002-04-21",
-      "id": 5
+      "id": 5,
+      "inventoryNum": "4583398459834",
+      "owner": 5,
+      "location": 4
     },
     {
       "name": "Mazda",
-      "model": "6",
+      "model": "3",
       "inUseSince": "1991-12-03",
       "id": 6
+    },
+    {
+      "name": "Toyota",
+      "model": "Corolla",
+      "inUseSince": "2001-01-01",
+      "id": 7
+    },
+    {
+      "name": "Toyota",
+      "model": "Avensis",
+      "inUseSince": "2004-04-12",
+      "id": 8
     }
   ]
 }

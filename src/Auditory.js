@@ -4,9 +4,12 @@ import { Form, FormLabel, InputGroup } from "react-bootstrap";
 import { useParams, useNavigate } from "react-router-dom";
 import { createAuditory, getAndSetAuditory, updateAuditory } from "./libauditory";
 import {MyTextField} from "./FormElements"
+import { routesInfo as _r, routeInfoToPathData as _rp} from "./routeTools";
 
-export default function Auditory({isNew}){
-    const id = useParams().id;
+
+export default function Auditory(props){
+    const {isNew} = props;
+    const _id = useParams().id;
     const [name, setName] = useState(null);
     const [size, setSize] = useState(null);
     const [building, setBuilding] = useState(null);
@@ -23,15 +26,22 @@ export default function Auditory({isNew}){
                 setUpdatePending,
                 setErr);
         } else {
-            updateAuditory({ id: id, name: name, size: size, building: building },
+            updateAuditory({ _id: _id, name: name, size: size, building: building },
                 setUpdatePending,
                 setErr);
         }
     }
-
+    const [path, setPath] = props.path;
+    useEffect(()=>{
+        setPath([
+            _rp(_r.home),
+            _rp(_r.auditories_all),
+            _rp({..._r.auditory_edit,title:(building||"") +" - " + (name||"")},true)
+        ]);
+    },[building, name]);
     useEffect(() => {
         if (!isNew) {
-            getAndSetAuditory(id, {
+            getAndSetAuditory(_id, {
                 setName: setName,
                 setSize: setSize,
                 setBuilding: setBuilding

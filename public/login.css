@@ -1,0 +1,49 @@
+body, html {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+  }
+.container {
+    display: grid;
+    align-items: center;
+    min-height: 100vh;
+    grid-template-rows: 1fr auto;
+    font-family: 'Courier New', Courier, monospace;
+}
+
+form {
+    border-width: 2px;
+    border: solid;
+    border-radius: 10px;
+    border-color: rgb(14, 112, 112);
+    display: grid;
+    background-color: azure;
+    margin: auto;
+    padding: 0px 10%;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(4, 1fr);
+    justify-items: center;
+
+}
+
+form > div {
+    grid-column: span 2;
+}
+
+form > h3 {
+    grid-column: span 2;
+}
+
+input, button {
+    padding: 7px;
+    margin: 7px;
+    border: 1px solid rgb(14, 112, 112);
+    border-radius: 5px;
+    width: auto;
+}
+
+footer {
+    padding: 10px;
+    background-color: rgb(71, 87, 87);
+    color: antiquewhite;
+}

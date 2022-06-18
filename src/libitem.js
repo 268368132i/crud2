@@ -7,18 +7,16 @@ export function reducer(state, action) {
         let newState;
         switch (action.action) {
             case "SET":
-                console.log("Old set: ", state);
-                console.log(`Setting ${action.element} to ${action.value}`);
                 newState = {...state};
                 newState[action.element] = action.value;
-                state[action.element] = action.value;
+                return newState;
+            case "SETMANY":
+                newState = { ...state, ...action.value };
                 return newState;
             case "PENDING":
-                console.log("Updating PENDING state");
                 newState = { ...state, pending: action.value }
                 return newState;
             case "ERROR":
-                console.log("Updating PENDING state");
                 newState = { ...state, _error: action.value }
                 return newState;
             default :
@@ -43,9 +41,10 @@ export function errorStateToReducer(dispatcher){
     }
 }
 
-export function dataStateToReducer(dispatcher){
+export function dataStateToReducer(dispatcher, dataname="data"){
+
     return function(data){
-        dispatcher({action: "SET", element: "data", value : data});
+        dispatcher({action: "SET", element: dataname, value : data});
     }
 }
 
@@ -62,7 +61,7 @@ export async function getItems() {
                 } catch (err) {
                     reject(err);
                 }
-            },1000);
+            },500);
         });
         return result;
     } catch (err) {
@@ -91,12 +90,9 @@ export async function getItem(id) {
 }
 
 export function getAndSetItems(setData, setError, setPending){
-    console.log("Starting load");
     setPending(true);
-
     getItems()
     .then(data => {
-         console.log("Done fetching" ,data);
          setData(data);
          setPending(false);
         })
@@ -107,25 +103,24 @@ export function getAndSetItems(setData, setError, setPending){
 }
 
 
-export function getAndSetItem(id, setData, setError, setPending){
-    console.log("Starting load");
-    setPending(true);
+export function getAndSetItem(id, dispatcher, setError, setPending){
+    dispatcher({action:"PENDING", value: true});
 
     getItem(id)
     .then(data => {
-         console.log("Done fetching" ,data);
-         setData.setName(data.name);
-         setData.setSize(data.size);
-         setData.setBuilding(data.building);
-         setPending(false);
+         Object.entries(data).forEach((entry)=>{
+            dispatcher({action: "SET", element: entry[0], value : entry[1]});
+         })
+         dispatcher({action:"PENDING", value: false});
         })
         .catch ((err) => {
-            setError(err);
-            setPending(false);
+            dispatcher({action:"ERROR", value: err});
+            dispatcher({action:"PENDING", value: false});
         });
 }
 
 export function updateItem(item, setPending, setError) {
+    console.log("updateItem: setPending:", setPending)
     setError(null);
     const runFetch = async ()=>{
         try {
@@ -133,10 +128,40 @@ export function updateItem(item, setPending, setError) {
                 setPending(true);
                 setTimeout(async () => {
                     try {
-                        const ret = await fetch(apiUrl + "/" + modelName + "/" + item.id, {
+                        const id = String(item._id);
+                        delete item._id;
+                        const ret = await fetch(apiUrl + "/" + modelName + "/" + id, {
                             method: "PATCH",
                             headers: { "content-type": "application/json" },
                             body: JSON.stringify(item),
+                        });
+                        if (ret.status !== 200) throw new Error("Server returned error");
+                        setPending(false);
+                        resolve();
+                    } catch (err) {
+                        reject(err);
+                    }
+                }, 1000)
+            });
+        } catch (err) {
+            setError(err);
+            setPending(false);
+        }
+    }
+    runFetch();
+}
+
+export function deleteItem(item, setPending, setError) {
+    setError(null);
+    const runFetch = async ()=>{
+        try {
+            const res = await new Promise((resolve, reject) => {
+                setPending(true);
+                setTimeout(async () => {
+                    try {
+                        const ret = await fetch(apiUrl + "/" + modelName + "/" + item._id, {
+                            method: "DELETE",
+                            headers: { "content-type": "application/json" },
                         });
                         if (ret.status !== 200) throw new Error("Server returned error");
                         setPending(false);

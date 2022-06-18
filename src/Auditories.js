@@ -1,15 +1,31 @@
-import { useEffect, useMemo, useState } from "react";
-import { getAndSetAuditories } from "./libauditory";
+import { useEffect, useMemo, useReducer, useState } from "react";
+import { getAndSetAuditories, deleteAuditory } from "./libauditory";
 import DataTable from "react-data-table-component";
 import Button from "react-bootstrap/Button"
 import Auditory from "./Auditory";
-import { Link } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
+import { routesInfo as _r, routeInfoToPathData as _rp} from "./routeTools";
+import {BsGear, BsTrash} from "react-icons/bs";
+import { AuditoryEdit } from "./AuditoryModal";
+import { reducer } from "./libitem";
+
+
 export default function Auditories(props){
 
 
     const [auditories, setAuditories] = useState(null);
     const [err, setErr] = useState(null);
     const [p, setP] = useState(true);
+
+    const [path, setPath] = props.path;
+    useEffect(()=>{
+        setPath([
+            _rp(_r.home),
+            _rp(_r.auditories_all,true)
+        ]);
+    },[]);
+
+    const [modalState, modalDispatcher] = useReducer(reducer,{});
 
     const columns = [
         {
@@ -32,48 +48,41 @@ export default function Auditories(props){
             button: true,
             cell: (row) =>{
                 console.log("Row: ", row)
-               return <Link className="btn" to={"/auditory/"+row.id+"/details"} data={row}>Edit</Link>
+               return (
+                <>
+                {/*<Button as={NavLink} to={"/auditory/"+row._id+"/edit"} data={row}><BsGear/></Button>*/}
+                <Button 
+                onClick={(e)=>{
+                    modalDispatcher({action:"SET", element:"show", value: true});
+                    modalDispatcher({action: "SETMANY", value: row});
+                    }} 
+                data={row}>
+                    <BsGear/>
+                </Button>
+                <Button variant="danger" onClick={(e)=>{console.log("Clicked", e.target)}}><BsTrash/></Button>
+                </>
+               )
             }
         }
     ]
-
-    const getAuditories = async function () {
-        try {
-            const result = await new Promise((resolve,reject)=>{
-             setTimeout(async() => {
-                try {
-                    const data = await fetch("http://localhost:8000/auditories");
-                    if (data.status!==200) throw new Error("Server error");
-                    resolve(await data.json());   
-                } catch (err) {
-                    console.log("Rejecting fetch");
-                    reject(err);
-                }              
-             }, 2000)
-        });
-        console.log("Result:", result);
-        return result;
-        } catch (err) {
-            console.log("Error fetching auditories");
-            return null;
-        }
-    }
-
-
     useEffect(()=>{
-        const aC = new AbortController();
-       /* async function fetch(){
-            console.log("Fetching:");
-            const auds = await getAuditories();
-            console.log("Got auditories:", auds)
-            setAuditories(auds);
-        }
-        fetch();*/
-        getAndSetAuditories(setAuditories, setErr, setP);
+        console.log("Loading auds");
 
+        const aC = new AbortController();
+        getAndSetAuditories(setAuditories, setErr, setP);
         return ()=>aC.abort();
     },[]);
 
+    useEffect(()=>{
+        console.log("Modal state: " , modalState);
+    }, [modalState])
+
+    const table = useMemo(()=>(
+        <DataTable
+        columns={columns}
+        data={auditories ? auditories : []}
+    />
+),[auditories]);
 
 
     return (
@@ -82,10 +91,17 @@ export default function Auditories(props){
                 Auditories
             </h1>
             {!auditories && <p>Loading...</p>}
-            {auditories && <DataTable
+            {auditories && 
+            <>
+            <AuditoryEdit show={[modalState, modalDispatcher]} success={()=>{}}/>
+            {/*<DataTable
                 columns={columns}
                 data={auditories ? auditories : []}
-            />}
+            />*/}
+            {table}
+            <Button as={NavLink} to="/auditory/new">Add new</Button>
+            </>
+            }
             {console.log(auditories)}
 
         </>
