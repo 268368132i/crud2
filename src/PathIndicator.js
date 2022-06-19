@@ -1,13 +1,11 @@
-import { Link } from "react-router-dom";
-import Breadcrumb from "react-bootstrap/Breadcrumb"
+import { Link } from 'react-router-dom'
+import Breadcrumb from 'react-bootstrap/Breadcrumb'
 
-export default function PathIndicator(props){
+export default function PathIndicator (props) {
+  const [path, setPath] = props.path
+  console.log('Path indicator', path)
 
-
-    const [path, setPath ]= props.path;
-    console.log("Path indicator", path);
-
-    return (
+  return (
         <Breadcrumb>
 
             {
@@ -17,12 +15,12 @@ export default function PathIndicator(props){
                         active={i === (path.length - 1)}
                     >
                         {i >= (path.length - 1)
-                            ? <>{location.name}</>
-                            : <Link to={location.route}>{location.name}</Link>
+                          ? <>{location.name}</>
+                          : <Link to={location.route}>{location.name}</Link>
                         }
                     </Breadcrumb.Item>
                 ))
             }
         </Breadcrumb>
-    )
+  )
 }

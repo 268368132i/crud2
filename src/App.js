@@ -1,25 +1,23 @@
-import { useReducer, useState } from "react";
-import { Container } from "react-bootstrap";
-import { BrowserRouter as Router,Routes, Route } from "react-router-dom";
-import Auditories from "./Auditories";
-import Auditory from "./Auditory";
-import { EditItem, NewItem } from "./ItemForm";
-import { ItemsList } from "./ItemsList";
-import {MyNavbar} from "./MyNavbar";
-import PathIndicator from "./PathIndicator";
-import { Welcome } from "./Welcome";
-import {UserProvider} from "./UserContext"
-import UserProfile from "./UserProfile";
-import {reducer as userReducer} from "./UserContext";
-import { routesInfo as _r} from "./routeTools";
-import UserList from "./Users";
 
+import React, { useReducer, useState } from 'react'
+import { Container } from 'react-bootstrap'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import Auditories from './Auditories'
+import Auditory from './Auditory'
+import { EditItem, NewItem } from './ItemForm'
+import { ItemsList } from './ItemsList'
+import { MyNavbar } from './MyNavbar'
+import PathIndicator from './PathIndicator'
+import { Welcome } from './Welcome'
+import { UserProvider, reducer as userReducer } from './UserContext'
+import UserProfile from './UserProfile'
+import { routesInfo as _r } from './routeTools'
+import UserList from './Users'
 
-function App() {
+function App () {
+  const [path, setPath] = useState([])
 
-  const [path, setPath] = useState([]);
-
-  const [state, dispatcher] = useReducer(userReducer,{name:"Test User", id: 5});
+  const [state, dispatcher] = useReducer(userReducer, { name: 'Test User', id: 5 })
 
   return (
     <Router>
@@ -45,7 +43,7 @@ function App() {
     </UserProvider>
       </div>
     </Router>
-  );
+  )
 }
 
-export default App;
+export default App

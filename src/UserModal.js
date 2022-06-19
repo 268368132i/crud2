@@ -1,13 +1,13 @@
-import Modal from "react-bootstrap/Modal"
-import UserProfile from "./UserProfile";
+import Modal from 'react-bootstrap/Modal'
+import UserProfile from './UserProfile'
 
-export default function UserModal(props){
-    const [state, dispatcher] = props.showState;
+export default function UserModal (props) {
+  const [state, dispatcher] = props.showState
 
-    return (
-        <Modal 
+  return (
+        <Modal
             show={state.show}
-            onHide={(e)=>dispatcher({action: "SET", element: "show", value: false})}
+            onHide={(e) => dispatcher({ action: 'SET', element: 'show', value: false })}
             >
             <Modal.Header closeButton>
                 <Modal.Title>
@@ -21,5 +21,5 @@ export default function UserModal(props){
 
             </Modal.Footer>
         </Modal>
-    )
+  )
 }

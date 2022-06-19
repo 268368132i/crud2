@@ -1,9 +1,7 @@
-import  Card  from "react-bootstrap/Card";
+import Card from 'react-bootstrap/Card'
 
-export default function MyCard(props){
-
-
-    return (
+export default function MyCard (props) {
+  return (
         <>
         <Card>
             <Card.Body>
@@ -16,5 +14,5 @@ export default function MyCard(props){
             </Card.Body>
         </Card>
         </>
-    )
+  )
 }

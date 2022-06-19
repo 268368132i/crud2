@@ -1,7 +1,7 @@
-import Spinner from "react-bootstrap/Spinner";
+import Spinner from 'react-bootstrap/Spinner'
 
-export default function (){
-    return(
+export default function () {
+  return (
         <Spinner animation="border" variant="primary"/>
-    )
+  )
 }

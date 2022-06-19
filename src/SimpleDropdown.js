@@ -1,23 +1,21 @@
-import  Dropdown from "react-bootstrap/Dropdown"
+import Dropdown from 'react-bootstrap/Dropdown'
 
-export default function SimpleDropdown(props){
+export default function SimpleDropdown (props) {
+  function clicked (e) {
 
-    function clicked(e){
+  }
 
-        
-    }
-
-    return (
+  return (
         <Dropdown className="d-inline mx-2">
         <Dropdown.Toggle id="dropdown-autoclose-true">
           Default Dropdown
         </Dropdown.Toggle>
-    
+
         <Dropdown.Menu>
           <Dropdown.Item href="#">Menu Item</Dropdown.Item>
           <Dropdown.Item href="#">Menu Item</Dropdown.Item>
           <Dropdown.Item href="#">Menu Item</Dropdown.Item>
         </Dropdown.Menu>
       </Dropdown>
-    )
+  )
 }
