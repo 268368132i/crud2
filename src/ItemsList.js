@@ -13,6 +13,9 @@ import Spinner from 'react-bootstrap/Spinner'
 import { Form } from 'react-bootstrap'
 import UserContext from './UserContext'
 import { routesInfo as _r } from './routeTools'
+import { Model } from './libREST'
+
+const endPoint = 'items'
 
 export function ItemsList (props) {
   const [userState, userDispatcher] = useContext(UserContext)
@@ -25,14 +28,21 @@ export function ItemsList (props) {
     ])
   }, [])
 
-  const [state, dispatcher] = useReducer(reducer, {})
+  //const [state, dispatcher] = useReducer(reducer, {})
+  
+  const model = new Model(endPoint)
+  const [state, dispatcher] = model.getStateAndDispatcher()
+
+  console.log("State:", state, " Disptcher:" , dispatcher)
+
   const nav = useNavigate()
   useEffect(() => {
     const ac = new AbortController()
 
-    getAndSetItems(dataStateToReducer(dispatcher),
+    /*getAndSetItems(dataStateToReducer(dispatcher),
       errorStateToReducer(dispatcher),
-      pendingStateToReducer(dispatcher))
+      pendingStateToReducer(dispatcher))*/
+      model.getMany()
 
     return () => ac.abort()
   }, [])
@@ -43,13 +53,13 @@ export function ItemsList (props) {
   // if (state.data){
   return (
         <>
-        {(state.pending || !state.data) &&
+        {(state.pending || !state[endPoint + 'List']) &&
         <>
             <Spinner animation="border" variant="primary" />
         </>
         }
     {
-    state.data &&
+    state[endPoint + 'List'] &&
     <>
     <Form.Check
         type="switch"
@@ -61,7 +71,7 @@ export function ItemsList (props) {
         checked={onlyMy}
     />
     <Accordion> {
-        state.data.map((item, key) => {
+        state[endPoint + 'List'].map((item, key) => {
           console.log(`Comparing item owner: ${item.owner} with user id: ${userState.id} onlyMy ${onlyMy}`)
           if (onlyMy && item.owner !== userState.id) return null
           return (<Accordion.Item key={key} eventKey={key}>
