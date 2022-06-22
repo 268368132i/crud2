@@ -49,7 +49,7 @@ export class Model {
       })
     }
   }
-  async update(obj, dispatcher, onSuccess = ()=>{}) {
+  async update(obj, dispatcher) {
     try {
       const id = String(obj._id)
       delete obj._id
@@ -62,12 +62,11 @@ export class Model {
         body: JSON.stringify(obj)
       })
       if (ret.status !== 201) throw new Error('Server returned error')
+      const json = await ret.json()
       dispatcher({
         action: 'FINISH'
       })
-      //Set _id back
-      obj._id=id
-      onSuccess()
+      return json
     } catch (err) {
       console.log(String(err))
       dispatcher({
@@ -75,6 +74,34 @@ export class Model {
       })
     }
   }
+
+  async create(obj, dispatcher) {
+    try {
+      dispatcher({
+        action: 'START'
+      })
+      const ret = await fetch(apiUrl + '/' + this.suffix + '/', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(obj)
+      })
+      if (ret.status !== 201) throw new Error('Server returned error')
+      const json = await ret.json();
+      console.log('Create returned:', json)
+      obj._id = json._id
+      dispatcher({
+        action: 'FINISH',
+        value: json
+      })
+      return json
+    } catch (err) {
+      console.log(String(err))
+      dispatcher({
+        action: 'ERROR'
+      })
+    }
+  }
+
   async delete(id , dispatcher, onSuccess = ()=>{}) {
 
     try {
@@ -134,7 +161,7 @@ export function getReducer(customActions = []) {
   }
 
   const actions = { ...stdActions, ...customActions };
-  //console.log("StdActions: ", stdActions, " Actions: ", actions, "Custom actions: ", customActions)
+  console.log("StdActions: ", stdActions, " Actions: ", actions, "Custom actions: ", customActions)
   return function (state, action) {
     let newState;
     try {

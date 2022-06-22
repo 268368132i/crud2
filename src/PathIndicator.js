@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { Link, NavLink } from 'react-router-dom'
 import Breadcrumb from 'react-bootstrap/Breadcrumb'
 
 export default function PathIndicator (props) {
@@ -12,15 +12,20 @@ export default function PathIndicator (props) {
                 path.map((location, i) => (
                     <Breadcrumb.Item
                         key={i}
-                        active={i === (path.length - 1)}
+                        /*linkAs={NavLink}*/
+                        to={ location.route }
+                        
+                        active
                     >
-                        {i >= (path.length - 1)
-                          ? <>{location.name}</>
-                          : <Link to={location.route}>{location.name}</Link>
+                        {i === (path.length-1)
+                        ? <span>{location.name}</span>
+                        :( <Link to={ location.route }>
+                        {location.name}
+                        </Link>)
                         }
                     </Breadcrumb.Item>
                 ))
             }
         </Breadcrumb>
-  )
+    )
 }

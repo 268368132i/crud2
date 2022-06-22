@@ -9,28 +9,39 @@ import Modal from 'react-bootstrap/Modal'
 import UserContext from './UserContext'
 import { routesInfo as _r } from './routeTools'
 import { Model, getReducer } from './libREST'
-import { ItemEditForm } from './ItemEditForm'
+import { ItemCreateForm, ItemEditForm } from './ItemEditForm'
 
 //Endpoint name for accessing model's API
 const endPoint = 'items'
+
 //Custom action for a reducer
 let custAction = new Array()
 custAction['editItem'] = (state, action)=>{
-  return {...state, show: true, selectedItem: action.value}
+  return {...state, editShow: true, selectedItem: action.value}
 }
+
 custAction['closeAndUpdate'] = (state, action) => {
+  //console.log('CloseAndUpdate', action)
   if (state.selectedItem===null) {
     return state
   }
-  const newList = [...state[endPoint + 'List']]
-  newList[state.selectedItem] = action.value
-  console.log('New items list: ', newList)
-  return {...state, show: false, selectedItem: null, itemsList: newList}
+  //listLastUpdate is updated whenever there is a change inside the list
+  return {...state, editShow: false, selectedItem: null, listLastUpdate: Date.now()}
+}
+custAction['closeAndCreate'] = (state, action) => {
+  //console.log('CloseAndCreate', action)
+  const list = state[endPoint + 'List']
+  list.push(action.value)
+  return {...state, createShow: false, itemList: list,
+    selectedItem: null, listLastUpdate: Date.now()}
 }
 custAction['cancelUpdate'] = (state, action) => {
-  return {...state, show: false, selectedItem: null}
+  return {...state, editShow: false, selectedItem: null}
 }
 const reducer = getReducer(custAction)
+
+
+
 
 export function ItemsList (props) {
   const [userState, userDispatcher] = useContext(UserContext)
@@ -61,6 +72,11 @@ export function ItemsList (props) {
     return () => ac.abort()
   }, [])
 
+  //Debug
+  useEffect(()=>{
+    console.log('State debug:', state)
+  },[state.listLastUpdate])
+
   //Called when a modal is cancelled
   function onCancellModal(){
     dispatcher
@@ -68,13 +84,11 @@ export function ItemsList (props) {
   //Modal dialog for editing
   const editModal = useMemo(()=>(
     <>
-      {state.show &&
+      {state.editShow &&
         <Modal
-          show={state.show}
+          show={state.editShow}
           onHide={(e) => dispatcher({
-            action: 'SET',
-            element: 'show',
-            value: false
+            action: 'cancelUpdate',
           })}
         >
           <Modal.Header closeButton>
@@ -89,11 +103,115 @@ export function ItemsList (props) {
               listDispatcher={dispatcher}
               />
           </Modal.Body>
-          {console.log('State in modal:', state)}
         </Modal>
       }
     </>
-  ),[state.show])
+  ), [state.editShow])
+
+  //Modal dialog for deletion
+  const deleteModal = useMemo(() => {
+    const getItem = (state) => state[endPoint + 'List'][state.selectedItem]
+    return (
+      <>
+        {state.deleteShow &&
+          <Modal
+            show={state.deleteShow}
+            onHide={(e) => dispatcher({
+              action: 'SETMANY',
+              value: {deleteShow: false, selectedItem: true}
+            })}
+          >
+            <Modal.Header closeButton>
+              <Modal.Title>
+                Delete {getItem(state).name}?
+              </Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              <div className='mb-3'>
+                <p>Are you sure you want to delete {getItem(state).name} ({getItem(state).model})?</p>
+                <div className='mb-3'>
+                  <Button
+                    variant='danger'
+                    onClick={(e) => {
+                      model.delete(state[endPoint + 'List'][state.selectedItem], (a) => {
+                        switch (a.action) {
+                          case 'START':
+                            dispatcher({
+                              action: 'SETMANY',
+                              value: { deletePending: true, deleteError: false }
+                            })
+                            break
+                          case 'FINISH':
+                            const list = state[endPoint + 'List']
+                            list.splice(state.selectedItem,1)
+                            dispatcher({
+                              action: 'SETMANY',
+                              value: {
+                                deletePending: false, daleteError: false,
+                                selectedItem: null, listLastUpdate: Date.now(),
+                                deleteShow: false, itemsList: list,
+                              }
+                            })
+                            break
+                          case 'ERROR':
+                            dispatcher({
+                              action: 'SETMANY',
+                              value: { deleteError: a.value, deletePending: false }
+                            })
+                            break
+                        }
+                      })
+                    }}
+                  >
+                    Delete
+                  </Button>
+                  {' '}
+                  <Button
+                    variant='secondary'
+                    onClick={(e) => {
+                      dispatcher({
+                        action: 'SETMANY',
+                        value: { deleteShow: false, selectedItem: null }
+                      })
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            </Modal.Body>
+          </Modal>
+        }
+      </>
+    )}, [state.deleteShow])
+
+    //Modal dialog for creation
+  const createModal = useMemo(() => {
+    return (
+      <>
+        {state.createShow &&
+          <Modal
+            show={state.createShow}
+            onHide={(e) => dispatcher({
+              action: 'SETMANY',
+              value: {createShow: false, selectedItem: null}
+            })}
+          >
+            <Modal.Header closeButton>
+              <Modal.Title>
+                Create a New Item
+              </Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+            <ItemCreateForm
+              model={model}
+              listDispatcher={dispatcher}
+              />
+            </Modal.Body>
+          </Modal>
+        }
+      </>
+    )}, [state.createShow])
 
   //List of items
   const list = useMemo(() => (
@@ -105,13 +223,13 @@ export function ItemsList (props) {
         label="Show only my items"
         onChange={e => {
           setOnlyMy(e.target.checked)
-          console.log('User state', userState.id)
+          //console.log('User state', userState.id)
         }}
         checked={onlyMy}
       />
       <Accordion> {
         state[endPoint + 'List'].map((item, key) => {
-          console.log(`Comparing item owner: ${item.owner} with user id: ${userState.id} onlyMy ${onlyMy}`)
+          //console.log(`Comparing item owner: ${item.owner} with user id: ${userState.id} onlyMy ${onlyMy}`)
           if (onlyMy && item.owner !== userState.id) return null
           return (<Accordion.Item key={key} eventKey={key}>
             <Accordion.Header>{item.name}</Accordion.Header>
@@ -120,14 +238,28 @@ export function ItemsList (props) {
               <p>{item.model}</p>
               <div>
                 <Button variant="primary" style={{ margin: '5px' }} onClick={(e)=>{
-                        console.log("Dispatcher (onButton):", dispatcher, "Key: ", key)
-                        console.log("Dispatcher type: ", typeof dispatcher)
+                        /*console.log("Dispatcher (onButton):", dispatcher, "Key: ", key)
+                        console.log("Dispatcher type: ", typeof dispatcher)*/
                         dispatcher({
                           action: 'editItem',
                           value: key
                         })
                 }}>Edit</Button>
-                <Button variant="danger" style={{ margin: '5px' }}>Delete</Button>
+                <Button
+                  variant="danger"
+                  style={{ margin: '5px' }}
+                  onClick={(e)=>{
+                    dispatcher({
+                      action: 'SETMANY',
+                      value: {
+                        deleteShow: true,
+                        selectedItem: key
+                      }
+                    })
+                  }}
+                  >
+                    Delete
+                  </Button>
               </div>
             </Accordion.Body>
           </Accordion.Item>
@@ -138,7 +270,7 @@ export function ItemsList (props) {
       </>
 }
       </>
-  ),[state[endPoint + 'List'], onlyMy])
+  ),[state[endPoint + 'List'], state.listLastUpdate, onlyMy])
 
   useEffect(()=>{
     console.log('itemsList has changed!:', state.itemsList)
@@ -154,12 +286,20 @@ export function ItemsList (props) {
   {
     state[endPoint + 'List'] &&
     <>
+    {createModal}
     {editModal}
+    {deleteModal}
     {list}
     <Button 
       className="mb-3" 
       variant="primary" 
-      onClick={() => nav('/item/new')} 
+      onClick={(e) => dispatcher({
+        action: 'SETMANY',
+        value: {
+          createShow: true,
+          selectedItem: null
+        }
+      })} 
       style={{ margin: '10px' }}
       >
         New Item
