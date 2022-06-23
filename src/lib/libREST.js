@@ -1,8 +1,9 @@
 import { useReducer } from "react";
-import { apiUrl } from './settings'
+import { apiUrl } from '../settings'
 
 export class Model {
   constructor(endPointSuffix) {
+    console.log('REST constructor')
     this.suffix = endPointSuffix
   }
 
@@ -17,7 +18,7 @@ export class Model {
       const json = await data.json()
       dispatcher({
         action: 'FINISH',
-        element: this.suffix + 'List',
+        element: 'itemsList',
         value: json
       })
     } catch (err) {
@@ -61,8 +62,13 @@ export class Model {
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify(obj)
       })
-      if (ret.status !== 201) throw new Error('Server returned error')
-      const json = await ret.json()
+      if (!ret.ok) throw new Error('Server returned error')
+      let json = {}
+      try {
+        json = await ret.json()
+      } catch (emptyErr){
+        //Doing nothing, it's OK to have an empty response
+      }
       dispatcher({
         action: 'FINISH'
       })
@@ -70,7 +76,8 @@ export class Model {
     } catch (err) {
       console.log(String(err))
       dispatcher({
-        action: 'ERROR'
+        action: 'ERROR',
+        value: err
       })
     }
   }
@@ -128,38 +135,37 @@ export class Model {
       })
     }
   }
-
 }
 
 
 export function getReducer(customActions = []) {
-  const stdActions = new Array()
-
-  stdActions["SET"] = (state, action) => {
-    return { ...state, [action.element]: action.value }
+  
+  const stdActions = {
+    SET : (state, action) => {
+      return { ...state, [action.element]: action.value }
+    },
+    START : (state, action) => {
+      return { ...state, pending: true, error: false }
+    },
+    FINISH : (state, action) => {
+      if (!action.element) {
+        return { ...state, pending: false, error: false }
+      }
+      return { ...state, [action.element]: action.value, pending: false, error: false }
+    },
+    ERROR : (state, action) => {
+      return { ...state, pending: false, error: action.value }
+    },
+    SETMANY : (state, action) => {
+      return { ...state, ...action.value }
+    },
+    PENDING : (state, action) => {
+      return { ...state, pending: action.value }
+    },
+    ERROR : (state, action) => {
+      return { ...state, error: action.value }
+    },
   }
-  stdActions["START"] = (state, action) => {
-    return { ...state, pending: true, error: false }
-  }
-  stdActions["FINISH"] = (state, action) => {
-    if (!action.element) {
-      return { ...state, pending: false, error: false }
-    }
-    return { ...state, [action.element]: action.value, pending: false, error: false }
-  }
-  stdActions["ERROR"] = (state, action) => {
-    return { ...state, pending: false, error: action.value }
-  }
-  stdActions["SETMANY"] = (state, action) => {
-    return { ...state, ...action.value }
-  }
-  stdActions["PENDING"] = (state, action) => {
-    return { ...state, pending: action.value }
-  }
-  stdActions["ERROR"] = (state, action) => {
-    return { ...state, error: action.value }
-  }
-
   const actions = { ...stdActions, ...customActions };
   console.log("StdActions: ", stdActions, " Actions: ", actions, "Custom actions: ", customActions)
   return function (state, action) {

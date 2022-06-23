@@ -2,51 +2,72 @@ import Button from 'react-bootstrap/Button'
 import { useNavigate } from 'react-router-dom'
 import { useContext, useState, useEffect, useMemo, useReducer } from 'react'
 import Accordion from 'react-bootstrap/Accordion'
-
 import Spinner from 'react-bootstrap/Spinner'
 import Form from 'react-bootstrap/Form'
 import Modal from 'react-bootstrap/Modal'
-import UserContext from './UserContext'
-import { routesInfo as _r } from './routeTools'
-import { Model, getReducer } from './libREST'
+import UserContext from '../UserContext'
+import { routesInfo as _r } from '../routeTools'
+import { Model, getReducer } from '../lib/libREST'
 import { ItemCreateForm, ItemEditForm } from './ItemEditForm'
 
 //Endpoint name for accessing model's API
 const endPoint = 'items'
 
 //Custom action for a reducer
-let custAction = new Array()
-custAction['editItem'] = (state, action)=>{
-  return {...state, editShow: true, selectedItem: action.value}
+const custAction = {
+  editItem : (state, action)=>{
+    return {...state, editShow: true, selectedItem: action.value}
+  },  
+  closeAndUpdate : (state, action) => {
+    //console.log('CloseAndUpdate', action)
+    if (state.selectedItem===null) {
+      return state
+    }
+    //listLastUpdate is updated whenever there is a change inside the list
+    return {...state, editShow: false, selectedItem: null, listLastUpdate: Date.now()}
+  },
+  closeAndCreate : (state, action) => {
+    //console.log('CloseAndCreate', action)
+    const list = state.itemsList
+    list.push(action.value)
+    return {...state, createShow: false, itemsList: list,
+      selectedItem: null, listLastUpdate: Date.now()}
+  },
+  cancelUpdate : (state, action) => {
+    return {...state, editShow: false, selectedItem: null}
+  },
 }
 
-custAction['closeAndUpdate'] = (state, action) => {
-  //console.log('CloseAndUpdate', action)
-  if (state.selectedItem===null) {
-    return state
-  }
-  //listLastUpdate is updated whenever there is a change inside the list
-  return {...state, editShow: false, selectedItem: null, listLastUpdate: Date.now()}
-}
-custAction['closeAndCreate'] = (state, action) => {
-  //console.log('CloseAndCreate', action)
-  const list = state[endPoint + 'List']
-  list.push(action.value)
-  return {...state, createShow: false, itemList: list,
-    selectedItem: null, listLastUpdate: Date.now()}
-}
-custAction['cancelUpdate'] = (state, action) => {
-  return {...state, editShow: false, selectedItem: null}
-}
 const reducer = getReducer(custAction)
 
 
 
 
 export function ItemsList (props) {
+  //Form fields for modal forms
+  const { formFields } = props
+
+  //Renderers for items in a list
+  const itemRenderers = props.itemRenderers || {
+    main: (item) =>{
+      return (
+        <>
+        {item.name}
+        </>
+      )
+    },
+    description: (item) => {
+      return (
+        <>
+          {item.name}
+        </>
+      )
+    }
+  }
+
   const [userState, userDispatcher] = useContext(UserContext)
   const [onlyMy, setOnlyMy] = useState(false)
-
+  
   //Path bar is set here
   const [path, setPath] = props.path
   useEffect(() => {
@@ -55,12 +76,20 @@ export function ItemsList (props) {
       { route: _r.items_all.route, name: _r.items_all.title, isActive: true }
     ])
   }, [])
-
+  
   //REST API data access model
-  const model = new Model(endPoint)
-
+  let model
+  console.log('props.dataModel type:', typeof props.dataModel)
+  if (typeof props.dataModel === 'undefined') {
+    console.log('New DataModel')
+    model = new Model(endPoint)
+  } else {
+    console.log('DataModel from props')
+    model = props.dataModel
+  }
+  
   const [state, dispatcher] = useReducer(reducer,{})
-
+  
   //Will be removed soon
   const nav = useNavigate()
 
@@ -77,12 +106,10 @@ export function ItemsList (props) {
     console.log('State debug:', state)
   },[state.listLastUpdate])
 
-  //Called when a modal is cancelled
-  function onCancellModal(){
-    dispatcher
-  }
   //Modal dialog for editing
-  const editModal = useMemo(()=>(
+  const editModal = useMemo(()=>{
+    const getItem = (state) => state.itemsList[state.selectedItem]
+  return (
     <>
       {state.editShow &&
         <Modal
@@ -93,24 +120,25 @@ export function ItemsList (props) {
         >
           <Modal.Header closeButton>
             <Modal.Title>
-              Edit Item
+              Edit {itemRenderers.main(getItem(state))}
             </Modal.Title>
           </Modal.Header>
           <Modal.Body>
             <ItemEditForm
-              item={state[endPoint + 'List'][state.selectedItem]}
+              item={state.itemsList[state.selectedItem]}
               model={model}
               listDispatcher={dispatcher}
+              formFields={formFields}
               />
           </Modal.Body>
         </Modal>
       }
     </>
-  ), [state.editShow])
+  )}, [state.editShow])
 
   //Modal dialog for deletion
   const deleteModal = useMemo(() => {
-    const getItem = (state) => state[endPoint + 'List'][state.selectedItem]
+    const getItem = (state) => state.itemsList[state.selectedItem]
     return (
       <>
         {state.deleteShow &&
@@ -123,17 +151,17 @@ export function ItemsList (props) {
           >
             <Modal.Header closeButton>
               <Modal.Title>
-                Delete {getItem(state).name}?
+                Delete "{itemRenderers.main(getItem(state))}"?
               </Modal.Title>
             </Modal.Header>
             <Modal.Body>
               <div className='mb-3'>
-                <p>Are you sure you want to delete {getItem(state).name} ({getItem(state).model})?</p>
+                <p>Are you sure you want to delete {getItem(state).name}{getItem(state).model ? ` (${getItem(state).model})` : ''}?</p>
                 <div className='mb-3'>
                   <Button
                     variant='danger'
                     onClick={(e) => {
-                      model.delete(state[endPoint + 'List'][state.selectedItem], (a) => {
+                      model.delete(state.itemsList[state.selectedItem], (a) => {
                         switch (a.action) {
                           case 'START':
                             dispatcher({
@@ -142,7 +170,7 @@ export function ItemsList (props) {
                             })
                             break
                           case 'FINISH':
-                            const list = state[endPoint + 'List']
+                            const list = state.itemsList
                             list.splice(state.selectedItem,1)
                             dispatcher({
                               action: 'SETMANY',
@@ -206,6 +234,7 @@ export function ItemsList (props) {
             <ItemCreateForm
               model={model}
               listDispatcher={dispatcher}
+              formFields={formFields}
               />
             </Modal.Body>
           </Modal>
@@ -216,7 +245,7 @@ export function ItemsList (props) {
   //List of items
   const list = useMemo(() => (
     <>
-    {state[endPoint + 'List'] &&
+    {state.itemsList &&
     <>
       <Form.Check
         type="switch"
@@ -228,14 +257,13 @@ export function ItemsList (props) {
         checked={onlyMy}
       />
       <Accordion> {
-        state[endPoint + 'List'].map((item, key) => {
+        state.itemsList.map((item, key) => {
           //console.log(`Comparing item owner: ${item.owner} with user id: ${userState.id} onlyMy ${onlyMy}`)
           if (onlyMy && item.owner !== userState.id) return null
           return (<Accordion.Item key={key} eventKey={key}>
-            <Accordion.Header>{item.name}</Accordion.Header>
+            <Accordion.Header>{itemRenderers.main(item)}</Accordion.Header>
             <Accordion.Body>
-              <h3>{item.name}</h3>
-              <p>{item.model}</p>
+              {itemRenderers.description(item)}
               <div>
                 <Button variant="primary" style={{ margin: '5px' }} onClick={(e)=>{
                         /*console.log("Dispatcher (onButton):", dispatcher, "Key: ", key)
@@ -270,7 +298,7 @@ export function ItemsList (props) {
       </>
 }
       </>
-  ),[state[endPoint + 'List'], state.listLastUpdate, onlyMy])
+  ),[state.itemsList, state.listLastUpdate, onlyMy])
 
   useEffect(()=>{
     console.log('itemsList has changed!:', state.itemsList)
@@ -278,13 +306,13 @@ export function ItemsList (props) {
 
   return (
     <>
-    {(state.pending || !state[endPoint + 'List']) &&
+    {(state.pending || !state.itemsList) &&
     <>
     <Spinner animation="border" variant="primary" />
     </>
   }
   {
-    state[endPoint + 'List'] &&
+    state.itemsList &&
     <>
     {createModal}
     {editModal}
