@@ -3,17 +3,9 @@ import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import MyCard from './MyCard'
 import { routesInfo as _r } from './routeTools'
+import PathIndicator from './PathIndicator'
 
 export function Welcome (props) {
-  const [path, setPath] = props.path
-
-  useEffect(() => {
-    setPath([{
-      route: '/',
-      name: 'Home',
-      isActive: true
-    }])
-  }, [])
 
   const chapters = [
     {
@@ -37,6 +29,7 @@ export function Welcome (props) {
   ]
   return (
         <>
+        <PathIndicator pathInfo={_r.home}/>
         <CardGroup>
             {chapters.map(c => (
                 <Link to={c.link} key={c.key}>

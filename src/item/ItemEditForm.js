@@ -5,7 +5,6 @@ import Button from "react-bootstrap/Button";
 import DefaultSpinner from "../DefaultSpinner";
 import { getReducer, Model } from "../lib/libREST";
 import ItemFormFields from "./ItemFormFields";
-import { updateItem } from "../libitem";
 
 
 const reducer = getReducer()

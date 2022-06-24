@@ -1,11 +1,31 @@
+import React, { useEffect, useMemo } from 'react'
 import { Link, NavLink } from 'react-router-dom'
 import Breadcrumb from 'react-bootstrap/Breadcrumb'
 
-export default function PathIndicator (props) {
-  const [path, setPath] = props.path
-  console.log('Path indicator', path)
+export default function PathIndicator(props) {
+    return (
+        <>
+        {props.pathInfo?.length &&
+            <Breadcrumb>
+            {props.pathInfo.map((page, i) => (
+                <Breadcrumb.Item
+                    active
+                >
+                    {i === (props.pathInfo.length - 1)
+                        ? <span>{page.title}</span>
+                        : (<Link to={page.route}>
+                            {page.title}
+                        </Link>)
+                    }
+                </Breadcrumb.Item>
+            ))}
+        </Breadcrumb>
+    }
+    </>
+    )
 
-  return (
+
+/*   return (
         <Breadcrumb>
 
             {
@@ -13,7 +33,7 @@ export default function PathIndicator (props) {
                     <Breadcrumb.Item
                         key={i}
                         /*linkAs={NavLink}*/
-                        to={ location.route }
+/*                         to={ location.route }
                         
                         active
                     >
@@ -27,5 +47,5 @@ export default function PathIndicator (props) {
                 ))
             }
         </Breadcrumb>
-    )
-}
+    ) */
+} 

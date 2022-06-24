@@ -3,6 +3,8 @@ import { useReducer, useEffect, useMemo } from 'react'
 import Form from 'react-bootstrap/Form'
 
 const locReducer = getReducer()
+//Location DataModel
+const locModel = new Model('location')
 
 export default function ItemFormFields(props) {
     const [state, dispatcher] = props.stateAndDispatcher
@@ -10,12 +12,16 @@ export default function ItemFormFields(props) {
 
     //Reducer for a location selector
     const [locState, locDisp] = useReducer(locReducer, {})
-    //Location DataModel
-    const locModel = new Model('location')
 
     useEffect(() => {
+        console.log('Getting locations for modal')
         locModel.getMany(locDisp)
     }, [])
+    useEffect(()=>{
+        console.log('LocState:', locState)
+    },[locState])
+
+    console.log('LocState_:', locState)
 
     return (
         <>
@@ -86,7 +92,7 @@ export default function ItemFormFields(props) {
             {useMemo(() => (
                 <Form.Group className="mb-3" key='location'>
                     <Form.Label>
-                        Location
+                        Locationnn
                     </Form.Label>
                     <Form.Select value={state.location} onChange={e => dispatcher({
                         action: 'SET',
@@ -96,14 +102,14 @@ export default function ItemFormFields(props) {
                         {locState.pending &&
                             <DefaultSpinner />
                         }
-                        {locState.locationList && locState.locationList.map(a => {
+                        {locState.itemsList && locState.itemsList.map(a => {
                             return (
                                 <option key={a._id} value={a._id}>{`${a.building} / ${a.name}`}</option>
                             )
                         })}
                     </Form.Select>
                 </Form.Group>
-            ), [state.location, locState.locationList])}
+            ), [state.location, locState.itemsList])}
             {state.error &&
                 <Form.Group className="mb-3">
                     <Alert

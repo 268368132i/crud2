@@ -5,7 +5,7 @@ export const routesInfo = {
   },
   items_all: {
     route: '/item/all',
-    title: 'Items'
+    title: 'Items',
   },
   item_edit: {
     route: '/item/:id/edit',
@@ -13,7 +13,7 @@ export const routesInfo = {
   },
   auditories_all: {
     route: '/auditory/all',
-    title: 'Locations'
+    title: 'Locations',
   },
   auditory_edit: {
     route: '/auditory/:id/edit',
@@ -21,7 +21,7 @@ export const routesInfo = {
   },
   users_all: {
     route: '/user/all',
-    title: 'System users'
+    title: 'System users',
   }
 }
 
