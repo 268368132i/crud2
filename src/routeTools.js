@@ -22,7 +22,15 @@ export const routesInfo = {
   users_all: {
     route: '/user/all',
     title: 'System users',
-  }
+  },
+  login: {
+    route: '/login',
+    title: 'Login',
+  },
+  profile: {
+    route: '/profile',
+    title: 'My Profile'
+  },
 }
 
 export function routeInfoToPathData (routeInfo, isActive = false) {

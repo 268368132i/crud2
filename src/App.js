@@ -21,11 +21,13 @@ import {listRenderers as userListRenderers} from './user/renderers'
 import LocationsList from './location/LocationsList'
 import UsersList from './user/UsersList'
 import ItemsList from './item/ItemsList'
+import Login from './auth/Login'
+import Profile from './auth/Profile'
 
 function App () {
   // const [path, setPath] = useState([])
 
-  const [state, dispatcher] = useReducer(userReducer, { name: 'Test User', id: 5 })
+  const [state, dispatcher] = useReducer(userReducer, {})
 
 
 
@@ -40,8 +42,9 @@ function App () {
             <Route path={_r.auditories_all.route} element={<LocationsList/>} />
             <Route path={_r.users_all.route} element={<UsersList/>}/>
             <Route path={_r.items_all.route} element={<ItemsList/>}/>
+            <Route path={_r.login.route} element={<Login pathInfo={_r.login}/>} />
+            <Route path={_r.profile.route} element={<Profile/>}/>
             <Route path={_r.home.route} element={<Welcome pathInfo={_r.home}/>} />
-
           </Routes>
         </Container>
 

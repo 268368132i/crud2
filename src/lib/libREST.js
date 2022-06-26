@@ -92,7 +92,7 @@ export class Model {
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify(obj)
       })
-      if (ret.status !== 201) throw new Error('Server returned error')
+      if (!ret.ok) throw new Error('Server returned error')
       const json = await ret.json();
       console.log('Create returned:', json)
       obj._id = json._id
@@ -104,8 +104,10 @@ export class Model {
     } catch (err) {
       console.log(String(err))
       dispatcher({
-        action: 'ERROR'
+        action: 'ERROR',
+        value: err
       })
+      return {}
     }
   }
 
@@ -161,9 +163,6 @@ export function getReducer(customActions = []) {
     },
     PENDING : (state, action) => {
       return { ...state, pending: action.value }
-    },
-    ERROR : (state, action) => {
-      return { ...state, error: action.value }
     },
   }
   const actions = { ...stdActions, ...customActions };

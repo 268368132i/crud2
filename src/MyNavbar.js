@@ -5,9 +5,11 @@ import Nav from 'react-bootstrap/Nav'
 import NavDropdown from 'react-bootstrap/NavDropdown'
 import UserContext from './UserContext'
 import React, { useContext } from 'react'
+import { routesInfo } from './routeTools'
+import { authModel } from './auth/libAuth'
 
 function _MyNavbar () {
-  const [state, dispatcher] = useContext(UserContext)
+  const [userState, userDispatcher] = useContext(UserContext)
 
   return (
         <Navbar bg="light" expand="lg">
@@ -22,18 +24,42 @@ function _MyNavbar () {
                     <Nav className="me-auto">
                         <Nav.Link as={NavLink} to="/auditory/all">Auditories</Nav.Link>
                         <Nav.Link as={NavLink} to="/item/all">Items</Nav.Link>
-                        <NavDropdown title={state.name || 'Profile'} id="basic-nav-dropdown">
-                            <NavDropdown.Item><Link to="/profile">Profile</Link></NavDropdown.Item>
-                            <NavDropdown.Item href="#action/3.2">My Items</NavDropdown.Item>
-                            <NavDropdown.Item href="#action/3.3">Something</NavDropdown.Item>
-                            <NavDropdown.Divider />
-                            <NavDropdown.Item href="#action/3.4">Separated link</NavDropdown.Item>
-                        </NavDropdown>
+                        {userState._id
+                            ? <NavDropdown title={userState._id ? `${userState.firstName} ${userState.lastName}` : 'Profile'} id="basic-nav-dropdown">
+                                <NavDropdown.Item as={NavLink} to={routesInfo.profile.route}>
+                                    {routesInfo.profile.title}
+                                </NavDropdown.Item>
+
+                                <NavDropdown.Divider />
+                                <NavDropdown.Item onClick={ async (e)=>{
+                                    authModel.logout((action)=>{
+                                        switch(action.action){
+                                            case 'START':
+                                                userDispatcher(action)
+                                                return
+                                            case 'FINISH':
+                                                userDispatcher({
+                                                    action: 'SETMANY',
+                                                    value: {pending: false, error: false, _id: false}
+                                                })
+                                                return
+                                            case 'ERROR':
+                                                userDispatcher(action)
+                                        }
+                                    })
+                                }}>
+                                    Logout
+                                </NavDropdown.Item>
+                            </NavDropdown>
+                            :<Nav.Link as={NavLink} to={routesInfo.login.route}>
+                                {routesInfo.login.title}
+                            </Nav.Link>
+                        }
                     </Nav>
                 </Navbar.Collapse>
             </Container>
         </Navbar>
-  )
+    )
 }
 
 export const MyNavbar = React.memo(_MyNavbar, () => true)
