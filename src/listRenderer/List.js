@@ -10,6 +10,7 @@ import { routesInfo as _r } from '../routeTools'
 import { Model, getReducer } from '../lib/libREST'
 import { ItemCreateForm, ItemEditForm } from '../item/ItemEditForm'
 import PathIndicator from '../PathIndicator'
+import { Alert } from 'react-bootstrap'
 
 //Endpoint name for accessing model's API
 const endPoint = 'items'
@@ -80,15 +81,9 @@ export function List (props) {
 
   
   //REST API data access model
-  let model
-  console.log('props.dataModel type:', typeof props.dataModel)
-  if (typeof props.dataModel === 'undefined') {
-    console.log('New DataModel')
-    model = new Model(endPoint)
-  } else {
     console.log('DataModel from props')
-    model = props.dataModel
-  }
+    const model = props.dataModel
+
   
   const [state, dispatcher] = useReducer(reducer,{})
   
@@ -106,7 +101,7 @@ export function List (props) {
   //Debug
   useEffect(()=>{
     console.log('State debug:', state)
-  },[state.listLastUpdate])
+  },[state])
 
   //Modal dialog for editing
   const editModal = useMemo(()=>{
@@ -308,9 +303,16 @@ export function List (props) {
 
   return (
     <>
-      {(state.pending || !state.itemsList) &&
+      {(state.pending) &&
         <>
           <Spinner animation="border" variant="primary" />
+        </>
+      }
+      {state.error &&
+      <>
+        <Alert variant='danger'>
+          {String(state.error)}
+        </Alert>
         </>
       }
       {

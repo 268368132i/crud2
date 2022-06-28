@@ -1,5 +1,5 @@
 
-import React, { useReducer, useState } from 'react'
+import React, { useMemo, useReducer, useState } from 'react'
 import { Container } from 'react-bootstrap'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 /* import Auditories from './obsolete/Auditories'
@@ -23,11 +23,14 @@ import UsersList from './user/UsersList'
 import ItemsList from './item/ItemsList'
 import Login from './auth/Login'
 import Profile from './auth/Profile'
+import { authReducer } from './auth/libAuth'
+import GroupsList from './Group/GroupsList'
+import CollectionPermissionsList from './CollectionPermissions/CollectionPermissionsList'
 
 function App () {
   // const [path, setPath] = useState([])
 
-  const [state, dispatcher] = useReducer(userReducer, {})
+  const [userState, userDispatcher] = useReducer(authReducer, {username: '', password: ''})
 
 
 
@@ -35,7 +38,7 @@ function App () {
   return (
     <Router>
       <div className="App">
-        <UserProvider value={[state, dispatcher]}>
+        <UserProvider value={[userState, userDispatcher]}>
         <MyNavbar />
         <Container>
           <Routes>
@@ -44,6 +47,8 @@ function App () {
             <Route path={_r.items_all.route} element={<ItemsList/>}/>
             <Route path={_r.login.route} element={<Login pathInfo={_r.login}/>} />
             <Route path={_r.profile.route} element={<Profile/>}/>
+            <Route path={_r.group_all.route} element={<GroupsList/>}/>
+            <Route path={_r.collectionPermissions_all.route} element={<CollectionPermissionsList/>}/>
             <Route path={_r.home.route} element={<Welcome pathInfo={_r.home}/>} />
           </Routes>
         </Container>

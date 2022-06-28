@@ -2,9 +2,9 @@ import Button from 'react-bootstrap/Button'
 import { useEffect, useState, useMemo } from 'react'
 import { Form, FormLabel, InputGroup } from 'react-bootstrap'
 import { useParams, useNavigate } from 'react-router-dom'
-import { createAuditory, getAndSetAuditory, updateAuditory } from './libauditory'
-import { MyTextField } from './FormElements'
-import { routesInfo as _r, routeInfoToPathData as _rp } from './routeTools'
+import { createAuditory, getAndSetAuditory, updateAuditory } from '../libauditory'
+import { MyTextField } from '../FormElements'
+import { routesInfo as _r, routeInfoToPathData as _rp } from '../routeTools'
 
 export default function Auditory (props) {
   const { isNew } = props

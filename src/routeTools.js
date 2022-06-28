@@ -31,6 +31,14 @@ export const routesInfo = {
     route: '/profile',
     title: 'My Profile'
   },
+  group_all: {
+    route: '/group',
+    title: 'Groups'
+  },
+  collectionPermissions_all: {
+    route: '/colperm',
+    title: 'Collections\' Permissions'
+  },
 }
 
 export function routeInfoToPathData (routeInfo, isActive = false) {

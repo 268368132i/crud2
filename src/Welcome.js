@@ -25,7 +25,19 @@ export function Welcome (props) {
       title: _r.users_all.title,
       text: 'Manage users',
       link: _r.users_all.route
-    }
+    },
+    {
+      key: 3,
+      title: _r.group_all.title,
+      text: 'Manage Users Groups',
+      link: _r.group_all.route
+    },
+    {
+      key: 4,
+      title: _r.collectionPermissions_all.title,
+      text: 'Manage permissions for collections',
+      link: _r.collectionPermissions_all.route
+    },
   ]
   return (
         <>

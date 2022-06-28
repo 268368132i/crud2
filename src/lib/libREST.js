@@ -14,7 +14,7 @@ export class Model {
       })
       const data = await fetch(apiUrl + '/' + this.suffix/* +
               query ? ('?' + new URLSearchParams(query)) : ''*/)
-      if (data.status !== 200) throw new Error('Server returned error')
+      if (!data.ok) throw new Error('Server returned error')
       const json = await data.json()
       dispatcher({
         action: 'FINISH',
@@ -156,6 +156,7 @@ export function getReducer(customActions = []) {
       return { ...state, [action.element]: action.value, pending: false, error: false }
     },
     ERROR : (state, action) => {
+      console.log('Setting error state')
       return { ...state, pending: false, error: action.value }
     },
     SETMANY : (state, action) => {
