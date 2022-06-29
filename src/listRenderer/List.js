@@ -311,7 +311,7 @@ export function List (props) {
       {state.error &&
       <>
         <Alert variant='danger'>
-          {String(state.error)}
+          {`${state.error.message}`}
         </Alert>
         </>
       }

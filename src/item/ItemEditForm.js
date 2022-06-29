@@ -152,6 +152,7 @@ export function ItemCreateForm({ model: dataModel, listDispatcher,
                         Create
                     </Button>
                 }
+                {state.error.message || String(state.error)}
                 {' '}
                 <Button
                     variant='secondary'
