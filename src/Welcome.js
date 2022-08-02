@@ -1,11 +1,11 @@
-import { Button, Card, CardGroup, Col, Row } from 'react-bootstrap'
-import { useEffect } from 'react'
+import React from 'react'
+import { CardGroup } from 'react-bootstrap'
 import { Link } from 'react-router-dom'
 import MyCard from './MyCard'
 import { routesInfo as _r } from './routeTools'
 import PathIndicator from './PathIndicator'
 
-export function Welcome (props) {
+export function Welcome () {
 
   const chapters = [
     {

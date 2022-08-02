@@ -6,12 +6,12 @@ import PathIndicator from "../PathIndicator";
 import CollectionPermissionsFormFields from './CollectionPermissionsFormFields';
 import { listRenderers } from './renderers';
 
-export default function CollectionPermissionsList(props) {
+export default function CollectionPermissionsList() {
 //Info for a path bar
-    const [pathInfo, setPathInfo] = useState([
+     const pathInfo = useState([
         routesInfo.home,
         routesInfo.collectionPermissions_all
-    ])
+    ])[0]
     console.log('PathInfo: ', pathInfo)  
 
     //Location data model

@@ -1,8 +1,6 @@
-import {Model, getReducer} from '../lib/libREST'
-import { useReducer, useEffect, useMemo } from 'react'
+import React, { useMemo } from 'react'
+import PropTypes from 'prop-types'
 import Form from 'react-bootstrap/Form'
-
-const locReducer = getReducer()
 
 export default function GroupFormFields(props) {
     const [state, dispatcher] = props.stateAndDispatcher
@@ -28,4 +26,8 @@ export default function GroupFormFields(props) {
             ), [state.name])}
         </>
     )
+}
+
+GroupFormFields.propTypes = {
+    stateAndDispatcher: PropTypes.array.isRequired
 }

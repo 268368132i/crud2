@@ -1,6 +1,7 @@
 import {Model, getReducer} from '../lib/libREST'
-import { useReducer, useEffect, useMemo } from 'react'
+import React, { useReducer, useEffect, useMemo } from 'react'
 import Form from 'react-bootstrap/Form'
+import PropTypes from 'prop-types'
 
 const locReducer = getReducer()
 
@@ -60,4 +61,8 @@ export default function LocationFormFields(props) {
             ), [state.building])}
         </>
     )
+}
+
+LocationFormFields.propTypes = {
+    stateAndDispatcher: PropTypes.array.isRequired
 }

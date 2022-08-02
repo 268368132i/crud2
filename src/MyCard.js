@@ -1,4 +1,6 @@
+import React from 'react'
 import Card from 'react-bootstrap/Card'
+import PropTypes from 'prop-types'
 
 export default function MyCard (props) {
   return (
@@ -15,4 +17,9 @@ export default function MyCard (props) {
         </Card>
         </>
   )
+}
+
+MyCard.propTypes = {
+    title: PropTypes.string,
+    children: PropTypes.element
 }

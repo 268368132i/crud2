@@ -21,8 +21,32 @@ export default class AuthModel extends Model {
               authDispatcher(action)
               return
           }
-          authDispatcher
         })
+    }
+    async getSession(authDispatcher) {
+      authDispatcher({ action: 'START' })
+      try {
+        const data = await fetch(`${apiUrl}/${this.suffix}/session`)
+        if (!data.ok) {
+          throw new Error(await data.json().message || data.statusText)
+        }
+        const json = await data.json()
+        if (!json.user) {
+          throw new Error('Bad session data')
+        }
+        authDispatcher({
+          action: 'login',
+          value: json
+        })
+        return true
+      } catch (err) {
+        console.log(err)
+        authDispatcher({
+          action: 'ERROR',
+          value: err
+        })
+        return false
+      }
     }
     async logout(authDispatcher){
         try {
@@ -63,7 +87,7 @@ const custActions = {
       password: '',
     }
   },
-  logout: (state, action) => {
+  logout: (state) => {
     return {
       ...state,
        pending: false, 

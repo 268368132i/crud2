@@ -1,26 +1,22 @@
 import Button from 'react-bootstrap/Button'
-import { useNavigate } from 'react-router-dom'
-import { useContext, useState, useEffect, useMemo, useReducer } from 'react'
+import React, { useContext, useState, useEffect, useMemo, useReducer } from 'react'
 import Accordion from 'react-bootstrap/Accordion'
 import Spinner from 'react-bootstrap/Spinner'
 import Form from 'react-bootstrap/Form'
 import Modal from 'react-bootstrap/Modal'
 import UserContext from '../UserContext'
-import { routesInfo as _r } from '../routeTools'
-import { Model, getReducer } from '../lib/libREST'
-import { ItemCreateForm, ItemEditForm } from '../item/ItemEditForm'
-import PathIndicator from '../PathIndicator'
+import { getReducer } from '../lib/libREST'
+import ItemEditForm from './ItemEditForm'
+import ItemCreateForm from './ItemCreateForm'
 import { Alert } from 'react-bootstrap'
-
-//Endpoint name for accessing model's API
-const endPoint = 'items'
+import PropTypes from 'prop-types'
 
 //Custom action for a reducer
 const custAction = {
   editItem : (state, action)=>{
     return {...state, editShow: true, selectedItem: action.value}
   },  
-  closeAndUpdate : (state, action) => {
+  closeAndUpdate : (state) => {
     //console.log('CloseAndUpdate', action)
     if (state.selectedItem===null) {
       return state
@@ -35,7 +31,7 @@ const custAction = {
     return {...state, createShow: false, itemsList: list,
       selectedItem: null, listLastUpdate: Date.now()}
   },
-  cancelUpdate : (state, action) => {
+  cancelUpdate : (state) => {
     return {...state, editShow: false, selectedItem: null}
   },
 }
@@ -67,28 +63,15 @@ export function List (props) {
     }
   }
 
-  const [userState, userDispatcher] = useContext(UserContext)
+  const userState = useContext(UserContext)[0]
   const [onlyMy, setOnlyMy] = useState(false)
-  
-  //Path bar is set here
-/*   const [path, setPath] = props.path
-  useEffect(() => {
-    setPath([
-      { route: _r.home.route, name: _r.home.title },
-      { route: _r.items_all.route, name: _r.items_all.title, isActive: true }
-    ])
-  }, []) */
-
-  
+    
   //REST API data access model
     console.log('DataModel from props')
     const model = props.dataModel
 
   
   const [state, dispatcher] = useReducer(reducer,{})
-  
-  //Will be removed soon
-  const nav = useNavigate()
 
   //Load items 
   useEffect(() => {
@@ -111,7 +94,7 @@ export function List (props) {
       {state.editShow &&
         <Modal
           show={state.editShow}
-          onHide={(e) => dispatcher({
+          onHide={() => dispatcher({
             action: 'cancelUpdate',
           })}
         >
@@ -133,7 +116,7 @@ export function List (props) {
     </>
   )}, [state.editShow])
 
-  //Modal dialog for deletion
+  // Modal dialog for deletion
   const deleteModal = useMemo(() => {
     const getItem = (state) => state.itemsList[state.selectedItem]
     return (
@@ -141,23 +124,30 @@ export function List (props) {
         {state.deleteShow &&
           <Modal
             show={state.deleteShow}
-            onHide={(e) => dispatcher({
+            onHide={() => dispatcher({
               action: 'SETMANY',
               value: {deleteShow: false, selectedItem: true}
             })}
           >
             <Modal.Header closeButton>
               <Modal.Title>
-                Delete "{itemRenderers.main(getItem(state))}"?
+                Delete &quot;{itemRenderers.main(getItem(state))}&ldquo;?
               </Modal.Title>
             </Modal.Header>
             <Modal.Body>
               <div className='mb-3'>
                 <p>Are you sure you want to delete {getItem(state).name}{getItem(state).model ? ` (${getItem(state).model})` : ''}?</p>
+                {state.deleteError &&
+                <div className='mb-3'>
+                  <Alert variant='danger'>
+                    {state.deleteError.message || String(state.deleteError)}
+                  </Alert>
+                </div>
+                }
                 <div className='mb-3'>
                   <Button
                     variant='danger'
-                    onClick={(e) => {
+                    onClick={() => {
                       model.delete(state.itemsList[state.selectedItem], (a) => {
                         switch (a.action) {
                           case 'START':
@@ -166,7 +156,7 @@ export function List (props) {
                               value: { deletePending: true, deleteError: false }
                             })
                             break
-                          case 'FINISH':
+                          case 'FINISH': {
                             const list = state.itemsList
                             list.splice(state.selectedItem,1)
                             dispatcher({
@@ -177,6 +167,7 @@ export function List (props) {
                                 deleteShow: false, itemsList: list,
                               }
                             })
+                          }
                             break
                           case 'ERROR':
                             dispatcher({
@@ -193,7 +184,7 @@ export function List (props) {
                   {' '}
                   <Button
                     variant='secondary'
-                    onClick={(e) => {
+                    onClick={() => {
                       dispatcher({
                         action: 'SETMANY',
                         value: { deleteShow: false, selectedItem: null }
@@ -217,7 +208,7 @@ export function List (props) {
         {state.createShow &&
           <Modal
             show={state.createShow}
-            onHide={(e) => dispatcher({
+            onHide={() => dispatcher({
               action: 'SETMANY',
               value: {createShow: false, selectedItem: null}
             })}
@@ -262,7 +253,7 @@ export function List (props) {
             <Accordion.Body>
               {itemRenderers.description(item)}
               <div>
-                <Button variant="primary" style={{ margin: '5px' }} onClick={(e)=>{
+                <Button variant="primary" style={{ margin: '5px' }} onClick={()=>{
                         /*console.log("Dispatcher (onButton):", dispatcher, "Key: ", key)
                         console.log("Dispatcher type: ", typeof dispatcher)*/
                         dispatcher({
@@ -273,7 +264,7 @@ export function List (props) {
                 <Button
                   variant="danger"
                   style={{ margin: '5px' }}
-                  onClick={(e)=>{
+                  onClick={()=>{
                     dispatcher({
                       action: 'SETMANY',
                       value: {
@@ -325,7 +316,7 @@ export function List (props) {
           <Button
             className="mb-3"
             variant="primary"
-            onClick={(e) => dispatcher({
+            onClick={() => dispatcher({
               action: 'SETMANY',
               value: {
                 createShow: true,
@@ -340,4 +331,10 @@ export function List (props) {
       }
     </>
   )
+}
+
+List.propTypes = {
+  formFields: PropTypes.func.isRequired,
+  itemRenderers: PropTypes.object,
+  dataModel: PropTypes.object
 }

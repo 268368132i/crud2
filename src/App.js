@@ -1,5 +1,5 @@
 
-import React, { useMemo, useReducer, useState } from 'react'
+import React, { useEffect, useReducer } from 'react'
 import { Container } from 'react-bootstrap'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 /* import Auditories from './obsolete/Auditories'
@@ -7,23 +7,16 @@ import Auditory from './obsolete/Auditory'
 import UserProfile from './UserProfile'
 import UserList from './Users'
 import { EditItem, NewItem } from './ItemForm' */
-import { List } from './listRenderer/List'
 import { MyNavbar } from './MyNavbar'
-import PathIndicator from './PathIndicator'
 import { Welcome } from './Welcome'
-import { UserProvider, reducer as userReducer } from './UserContext'
-import { routesInfo, routesInfo as _r } from './routeTools'
-import ItemFormFields from './item/ItemFormFields'
-import LocationFormFields from './location/LocationFormFields'
-import UserFormFields from './user/UserFormFields'
-import {Model} from './lib/libREST'
-import {listRenderers as userListRenderers} from './user/renderers'
+import { UserProvider } from './UserContext'
+import { routesInfo as _r } from './routeTools'
 import LocationsList from './location/LocationsList'
 import UsersList from './user/UsersList'
 import ItemsList from './item/ItemsList'
 import Login from './auth/Login'
 import Profile from './auth/Profile'
-import { authReducer } from './auth/libAuth'
+import { authModel, authReducer } from './auth/libAuth'
 import GroupsList from './Group/GroupsList'
 import CollectionPermissionsList from './CollectionPermissions/CollectionPermissionsList'
 
@@ -32,7 +25,11 @@ function App () {
 
   const [userState, userDispatcher] = useReducer(authReducer, {username: '', password: ''})
 
-
+  useEffect(() => {
+    const ac = new AbortController()
+    authModel.getSession(userDispatcher)
+    return ac.abort()
+  }, [])
 
 
   return (

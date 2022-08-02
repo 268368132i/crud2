@@ -1,7 +1,6 @@
 import React, { useContext, useEffect, useMemo, useReducer } from 'react'
 import Form from 'react-bootstrap/Form'
 import Button from 'react-bootstrap/Button'
-import { getReducer, Model } from '../lib/libREST'
 import UserContext from '../UserContext'
 import DefaultSpinner from '../DefaultSpinner'
 import { Alert } from 'react-bootstrap'
@@ -12,7 +11,7 @@ import { routesInfo } from '../routeTools'
 
 export default function Login(){
     const [state, dispatcher] = useReducer(authReducer,{})
-    const [userState, userDispatcher] = useContext(UserContext)
+    const userDispatcher = useContext(UserContext)[1]
     const nav = useNavigate();
     const submitLogin =async (e)=>{
         e.preventDefault()
@@ -29,6 +28,7 @@ export default function Login(){
             nav(routesInfo.home.route)
         }
     }
+    // Debug
     useEffect(() => {
         console.log('Authenticatd user is:', state)
     }, [state])

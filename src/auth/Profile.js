@@ -1,19 +1,75 @@
-import React, { useReducer } from 'react'
+import React, { useReducer, useContext, useEffect } from 'react'
+import Button from 'react-bootstrap/Button'
 import Form from 'react-bootstrap/Form'
-import { getReducer } from '../lib/libREST'
 import UserFormFields from '../user/UserFormFields'
+import UserContext from '../UserContext'
+import { authModel, authReducer } from './libAuth'
 
-const reducer = getReducer
+const submitProfile = async (formState, formDispatcher, contextDispatcher) => {
+    const user = {
+        _id: formState._id,
+        username: formState.username,
+        firstName: formState.firstName,
+        lastName: formState.lastName,
+        groups: formState.groups
+    }
+    if (await authModel.update(user, formDispatcher)) {
+        contextDispatcher({
+            action: 'SETMANY',
+            value: user
+        })
+    }
+}
+
 
 export default function Profile() {
 
-const [formState, formDispatcher] = useReducer(reducer, {})
+    const [userState, userDispatcher] = useContext(UserContext)
+
+    const [formState, formDispatcher] = useReducer(authReducer, {
+        username: userState.username,
+        lastName: userState.lastName,
+        firstName: userState.firstName,
+        groups: [...userState.groups || []],
+    })
+
+    // Debug
+    useEffect(() => {
+        console.log('Profile fields changed: ', formState)
+    }, [formState])
+    // Update form fields on global user context change
+    useEffect(() => {
+        formDispatcher({
+            action: 'SETMANY',
+            value: { ...userState, groups: [...userState.groups || []] }
+        })
+    }, [userState])
+
+
 
     return (
-        <Form>
+        <Form
+            onSubmit={(e) => {
+                e.preventDefault()
+                submitProfile(formState, formDispatcher, userDispatcher)
+            }}
+        >
             <UserFormFields
-                stateAndDispatcher = {[formState, formDispatcher]}
+                stateAndDispatcher={[formState, formDispatcher]}
             />
+            <Form.Group
+                className='mt-3'
+            >
+                <Button
+                    type='submit'
+                    disabled={formState.pending}
+                >
+                    {formState.pending
+                    ? 'Saving...'
+                    : 'Save'
+                    }
+                </Button>
+            </Form.Group>
         </Form>
     )
 }

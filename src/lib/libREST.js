@@ -7,6 +7,7 @@ export class Model {
     this.suffix = endPointSuffix
   }
 
+
   async getMany(dispatcher) {
     try {
       dispatcher({
@@ -21,12 +22,14 @@ export class Model {
         element: 'itemsList',
         value: json
       })
+      return true
     } catch (err) {
       console.log(err)
       dispatcher({
         action: 'ERROR',
         value: err
       })
+      return false
     }
   }
   async getOne(id, dispatcher) {
@@ -35,19 +38,21 @@ export class Model {
         action: 'START'
       })
       const data = await fetch(apiUrl + '/' + this.suffix + '/' + id)
-      if (data.status !== 200) throw new Error('Server returned error')
+      if (!ret.ok) throw {status: ret.status || 500, message: ret.statusText}
       const json = await data.json()
       dispatcher({
         action: 'FINISH',
         element: this.suffix,
         value: json
       })
+      return reue
     } catch (err) {
-      console.log(String(err))
+      console.log(err)
       dispatcher({
         action: 'ERROR',
         value: err
       })
+      return false
     }
   }
   async update(obj, dispatcher) {
@@ -62,7 +67,7 @@ export class Model {
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify(obj)
       })
-      if (!ret.ok) throw new Error('Server returned error')
+      if (!ret.ok) throw {status: ret.status || 500, message: ret.statusText}
       let json = {}
       try {
         json = await ret.json()
@@ -79,6 +84,7 @@ export class Model {
         action: 'ERROR',
         value: err
       })
+      return false
     }
   }
 
@@ -92,7 +98,7 @@ export class Model {
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify(obj)
       })
-      if (!ret.ok) throw new Error('Server returned error')
+      if (!ret.ok) throw {status: ret.status || 500, message: ret.statusText}
       const json = await ret.json();
       console.log('Create returned:', json)
       obj._id = json._id
@@ -107,7 +113,7 @@ export class Model {
         action: 'ERROR',
         value: err
       })
-      return {}
+      return false
     }
   }
 
@@ -124,7 +130,7 @@ export class Model {
         method: 'DELETE',
         headers: { 'content-type': 'application/json' }
       })
-      if (ret.status !== 200) throw new Error('Server returned error')
+      if (!ret.ok) throw {status: ret.status || 500, message: ret.statusText}
       dispatcher({
         action: 'FINISH'
       })
@@ -135,6 +141,7 @@ export class Model {
         action: 'ERROR',
         value: err
       })
+      return false
     }
   }
 }

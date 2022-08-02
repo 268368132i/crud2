@@ -5,10 +5,9 @@ import { List } from "../listRenderer/List";
 import {routesInfo} from '../routeTools'
 import PathIndicator from "../PathIndicator";
 
-export default function GroupsList(props) {
+export default function GroupsList() {
 //Info for a path bar
-    const [pathInfo, setPathInfo] = useState([routesInfo.home, routesInfo.group_all])
-    console.log('PathInfo: ', pathInfo)  
+    const pathInfo = useState([routesInfo.home, routesInfo.group_all])[0]
 
     //Location data model
     const grpModel = new Model('group')

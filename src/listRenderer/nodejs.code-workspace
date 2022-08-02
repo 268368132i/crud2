@@ -1,0 +1,14 @@
+{
+	"folders": [
+		{
+			"path": "../.."
+		},
+		{
+			"path": "../../../express2"
+		},
+		{
+			"path": "../../../../javascript"
+		}
+	],
+	"settings": {}
+}

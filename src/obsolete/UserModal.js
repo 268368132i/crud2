@@ -1,4 +1,3 @@
-import { useMemo } from 'react'
 import Modal from 'react-bootstrap/Modal'
 import UserProfile from './UserProfile'
 

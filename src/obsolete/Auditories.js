@@ -1,13 +1,13 @@
 import React, { useEffect, useMemo, useReducer, useState } from 'react'
-import { getAndSetAuditories, deleteAuditory } from './libauditory'
+import { getAndSetAuditories, deleteAuditory } from '../libauditory'
 import DataTable from 'react-data-table-component'
 import Button from 'react-bootstrap/Button'
 import Auditory from './Auditory'
 import { Link, NavLink } from 'react-router-dom'
-import { routesInfo as _r, routeInfoToPathData as _rp } from './routeTools'
+import { routesInfo as _r, routeInfoToPathData as _rp } from '../routeTools'
 import { BsGear, BsTrash } from 'react-icons/bs'
 import { AuditoryEdit } from './AuditoryModal'
-import { reducer } from './libitem'
+import { reducer } from '../libitem'
 
 export default function Auditories (props) {
   const [auditories, setAuditories] = useState(null)

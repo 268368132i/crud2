@@ -7,6 +7,7 @@ import UserContext from './UserContext'
 import React, { useContext, useEffect, useMemo } from 'react'
 import { routesInfo } from './routeTools'
 import { authModel } from './auth/libAuth'
+import DefaultSpinner from './DefaultSpinner'
 
 function _MyNavbar () {
   const [userState, userDispatcher] = useContext(UserContext)
@@ -34,35 +35,39 @@ function _MyNavbar () {
                     <Nav>
                         <Nav.Link as={NavLink} to="/auditory/all">Auditories</Nav.Link>
                         <Nav.Link as={NavLink} to="/item/all">Items</Nav.Link>
-                        {userState.authenticated
-                            ? <NavDropdown
-                                title={userState.authenticated ? `${userState.firstName} ${userState.lastName}` : 'Profile'}
-                                id="user-dropdown"
-                                >
-                                <NavDropdown.Item as={NavLink} to={routesInfo.profile.route}>
-                                    {routesInfo.profile.title}
-                                </NavDropdown.Item>
+                        {userState.pending && 
+                            <DefaultSpinner/>
+                          }
+                          {userState.authenticated &&
+                              <NavDropdown
+                                  title={userState.authenticated ? `${userState.firstName} ${userState.lastName}` : 'Profile'}
+                                  id="user-dropdown"
+                              >
+                                  <NavDropdown.Item as={NavLink} to={routesInfo.profile.route}>
+                                      {routesInfo.profile.title}
+                                  </NavDropdown.Item>
 
-                                <NavDropdown.Divider />
-                                <NavDropdown.Item onClick={ async (e)=>{
-                                    authModel.logout(userDispatcher)
-                                }}>
-                                    Logout
-                                </NavDropdown.Item>
-                            </NavDropdown>
-                            :<Nav.Link
-                                as={NavLink}
-                                to={routesInfo.login.route}
-                                >
-                                {routesInfo.login.title}
-                            </Nav.Link>
+                                  <NavDropdown.Divider />
+                                  <NavDropdown.Item onClick={async () => {
+                                      authModel.logout(userDispatcher)
+                                  }}>
+                                      Logout
+                                  </NavDropdown.Item>
+                              </NavDropdown>
+                          }
+                          {!(userState.authenticated || userState.pending) &&
+                            <Nav.Link
+                              as={NavLink}
+                              to={routesInfo.login.route}
+                          >
+                              {routesInfo.login.title}
+                          </Nav.Link>
                         }
-                        
                     </Nav>
                 </Navbar.Collapse>
             </Container>
         </Navbar>
-      ),[userState.authenticated])}
+      ),[userState.pending, userState.authenticated])}
       </>
     )
 }
